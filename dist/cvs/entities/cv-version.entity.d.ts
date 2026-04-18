@@ -1,0 +1,30 @@
+import { CreatedUpdatedEntity } from '../../common/entities/timestamped.entity';
+import { CreatedByProcess, CvVersionType, GeneratedFileFormat } from '../../common/enums/database.enums';
+import { SystemEvent } from '../../events/entities/system-event.entity';
+import { CvImprovementRequest } from '../../improvements/entities/cv-improvement-request.entity';
+import { Cv } from './cv.entity';
+import { CvEducationEntry } from './cv-education-entry.entity';
+import { CvPersonalDetail } from './cv-personal-detail.entity';
+import { CvVersionSkill } from './cv-version-skill.entity';
+import { CvWorkExperience } from './cv-work-experience.entity';
+export declare class CvVersion extends CreatedUpdatedEntity {
+    id: string;
+    cvId: string;
+    versionNumber: number;
+    versionType: CvVersionType;
+    targetRole: string;
+    jobDescription: string | null;
+    summaryText: string | null;
+    skillsText: string | null;
+    generatedFileUrl: string | null;
+    generatedFileFormat: GeneratedFileFormat | null;
+    isCurrent: boolean;
+    createdByProcess: CreatedByProcess;
+    cv: Cv;
+    personalDetail: CvPersonalDetail;
+    workExperiences: CvWorkExperience[];
+    educationEntries: CvEducationEntry[];
+    versionSkills: CvVersionSkill[];
+    improvementRequestResults: CvImprovementRequest[];
+    systemEvents: SystemEvent[];
+}
