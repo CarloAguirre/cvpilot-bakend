@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 import {
   CreatedByProcess,
+  CvStylePreset,
   GeneratedFileFormat,
 } from '../../common/enums/database.enums';
 
@@ -26,6 +27,10 @@ export class CreateImprovedCvVersionDto {
   @IsOptional()
   @IsString()
   skillsText?: string;
+
+  @IsOptional()
+  @IsEnum(CvStylePreset)
+  stylePreset?: CvStylePreset;
 
   @IsOptional()
   @IsString()

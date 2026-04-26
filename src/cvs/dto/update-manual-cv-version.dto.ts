@@ -10,18 +10,17 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  CvSourceType,
-  CvStylePreset,
-} from '../../common/enums/database.enums';
+import { CvStylePreset } from '../../common/enums/database.enums';
 
-export class CreateCvPersonalDetailsDto {
+export class ManualEditCvPersonalDetailsDto {
+  @IsOptional()
   @IsString()
   @MaxLength(150)
-  fullName!: string;
+  fullName?: string;
 
+  @IsOptional()
   @IsEmail()
-  email!: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
@@ -38,7 +37,7 @@ export class CreateCvPersonalDetailsDto {
   professionalSummary?: string;
 }
 
-export class CreateCvWorkExperienceDto {
+export class ManualEditCvWorkExperienceDto {
   @IsString()
   @MaxLength(150)
   companyName!: string;
@@ -68,7 +67,7 @@ export class CreateCvWorkExperienceDto {
   description?: string;
 }
 
-export class CreateCvEducationEntryDto {
+export class ManualEditCvEducationEntryDto {
   @IsString()
   @MaxLength(150)
   institutionName!: string;
@@ -90,53 +89,55 @@ export class CreateCvEducationEntryDto {
   endDate?: string;
 }
 
-export class CreateCvDto {
+export class UpdateManualCvVersionDto {
   @IsOptional()
   @IsString()
   @MaxLength(150)
   title?: string;
 
+  @IsOptional()
   @IsString()
   @MaxLength(150)
-  targetRole!: string;
+  targetRole?: string;
 
   @IsOptional()
-  @IsEnum(CvSourceType)
-  sourceType?: CvSourceType;
+  @IsString()
+  jobDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  summaryText?: string;
+
+  @IsOptional()
+  @IsString()
+  skillsText?: string;
 
   @IsOptional()
   @IsEnum(CvStylePreset)
   stylePreset?: CvStylePreset;
 
   @IsOptional()
-  @IsString()
-  jobDescription?: string;
-
   @ValidateNested()
-  @Type(() => CreateCvPersonalDetailsDto)
-  personalDetails!: CreateCvPersonalDetailsDto;
+  @Type(() => ManualEditCvPersonalDetailsDto)
+  personalDetails?: ManualEditCvPersonalDetailsDto;
 
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(30)
   @ValidateNested({ each: true })
-  @Type(() => CreateCvWorkExperienceDto)
-  workExperiences?: CreateCvWorkExperienceDto[];
+  @Type(() => ManualEditCvWorkExperienceDto)
+  workExperiences?: ManualEditCvWorkExperienceDto[];
 
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(20)
   @ValidateNested({ each: true })
-  @Type(() => CreateCvEducationEntryDto)
-  educationEntries?: CreateCvEducationEntryDto[];
+  @Type(() => ManualEditCvEducationEntryDto)
+  educationEntries?: ManualEditCvEducationEntryDto[];
 
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(50)
   @IsString({ each: true })
   skills?: string[];
-
-  @IsOptional()
-  @IsString()
-  skillsText?: string;
 }

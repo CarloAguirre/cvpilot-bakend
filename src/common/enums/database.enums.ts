@@ -26,6 +26,12 @@ export enum GeneratedFileFormat {
   DOCX = 'docx',
 }
 
+export enum CvStylePreset {
+  ATS = 'ats',
+  HARVARD = 'harvard',
+  MODERNO = 'moderno',
+}
+
 export enum CvImprovementRequestStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',

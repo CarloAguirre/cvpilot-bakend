@@ -3,6 +3,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { CreateImprovedCvVersionDto } from './dto/create-improved-cv-version.dto';
 import { UpdateCvArchiveDto } from './dto/update-cv-archive.dto';
+import { UpdateManualCvVersionDto } from './dto/update-manual-cv-version.dto';
 import { CvsService } from './cvs.service';
 
 @Controller('cvs')
@@ -58,6 +59,19 @@ export class CvsController {
       userId,
       cvId,
       createImprovedCvVersionDto,
+    );
+  }
+
+  @Post(':cvId/versions/manual-edit')
+  createManualEditedVersion(
+    @CurrentUser('sub') userId: string,
+    @Param('cvId') cvId: string,
+    @Body() updateManualCvVersionDto: UpdateManualCvVersionDto,
+  ) {
+    return this.cvsService.createManualEditedVersion(
+      userId,
+      cvId,
+      updateManualCvVersionDto,
     );
   }
 }

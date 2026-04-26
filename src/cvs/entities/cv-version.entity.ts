@@ -12,6 +12,7 @@ import {
 import { CreatedUpdatedEntity } from '../../common/entities/timestamped.entity';
 import {
   CreatedByProcess,
+  CvStylePreset,
   CvVersionType,
   GeneratedFileFormat,
 } from '../../common/enums/database.enums';
@@ -58,6 +59,14 @@ export class CvVersion extends CreatedUpdatedEntity {
   @Column({ name: 'skills_text', type: 'text', nullable: true })
   skillsText!: string | null;
 
+  @Column({
+    name: 'style_preset',
+    type: 'varchar',
+    length: 20,
+    default: CvStylePreset.ATS,
+  })
+  stylePreset!: CvStylePreset;
+
   @Column({ name: 'generated_file_url', type: 'text', nullable: true })
   generatedFileUrl!: string | null;
 
@@ -84,7 +93,10 @@ export class CvVersion extends CreatedUpdatedEntity {
   @JoinColumn({ name: 'cv_id' })
   cv!: Cv;
 
-  @OneToOne(() => CvPersonalDetail, (cvPersonalDetail) => cvPersonalDetail.cvVersion)
+  @OneToOne(
+    () => CvPersonalDetail,
+    (cvPersonalDetail) => cvPersonalDetail.cvVersion,
+  )
   personalDetail!: CvPersonalDetail;
 
   @OneToMany(

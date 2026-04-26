@@ -5,12 +5,14 @@ import {
   CreatedByProcess,
   CvImprovementRequestStatus,
   CvSourceType,
+  CvStylePreset,
   CvVersionType,
 } from '../common/enums/database.enums';
 import { CvImprovementRequest } from '../improvements/entities/cv-improvement-request.entity';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { CreateImprovedCvVersionDto } from './dto/create-improved-cv-version.dto';
 import { UpdateCvArchiveDto } from './dto/update-cv-archive.dto';
+import { UpdateManualCvVersionDto } from './dto/update-manual-cv-version.dto';
 import { CvEducationEntry } from './entities/cv-education-entry.entity';
 import { CvPersonalDetail } from './entities/cv-personal-detail.entity';
 import { CvVersionSkill } from './entities/cv-version-skill.entity';
@@ -103,7 +105,7 @@ export class CvsService {
           title: createCvDto.title?.trim() ?? null,
           targetRole: createCvDto.targetRole.trim(),
           sourceType:
-            createCvDto.sourceType?.trim() === CvSourceType.IMPROVED
+            createCvDto.sourceType === CvSourceType.IMPROVED
               ? CvSourceType.IMPROVED
               : CvSourceType.CREATED,
           currentVersionId: null,
@@ -123,6 +125,7 @@ export class CvsService {
           skillsText:
             createCvDto.skillsText?.trim() ??
             this.stringifySkillList(createCvDto.skills),
+          stylePreset: createCvDto.stylePreset ?? CvStylePreset.ATS,
           isCurrent: true,
           createdByProcess: CreatedByProcess.MANUAL,
         }),
@@ -242,6 +245,10 @@ export class CvsService {
             createImprovedCvVersionDto.skillsText?.trim() ??
             this.stringifySkillList(createImprovedCvVersionDto.skills) ??
             sourceVersion.skillsText,
+          stylePreset:
+            createImprovedCvVersionDto.stylePreset ??
+            sourceVersion.stylePreset ??
+            CvStylePreset.ATS,
           generatedFileUrl:
             createImprovedCvVersionDto.generatedFileUrl?.trim() ?? null,
           generatedFileFormat:
@@ -346,6 +353,201 @@ export class CvsService {
     return this.getCv(userId, cvId);
   }
 
+  async createManualEditedVersion(
+    userId: string,
+    cvId: string,
+    updateManualCvVersionDto: UpdateManualCvVersionDto,
+  ) {
+    const sourceCv = await this.findCvOrFail(userId, cvId);
+    const sourceVersion = sourceCv.currentVersion ?? sourceCv.versions[0];
+
+    if (!sourceVersion) {
+      throw new NotFoundException('Current CV version not found');
+    }
+
+    await this.dataSource.transaction(async (manager) => {
+      const cvRepository = manager.getRepository(Cv);
+      const cvVersionRepository = manager.getRepository(CvVersion);
+      const cvPersonalDetailsRepository = manager.getRepository(CvPersonalDetail);
+      const cvWorkExperiencesRepository = manager.getRepository(CvWorkExperience);
+      const cvEducationEntriesRepository = manager.getRepository(CvEducationEntry);
+      const skillsRepository = manager.getRepository(Skill);
+      const cvVersionSkillsRepository = manager.getRepository(CvVersionSkill);
+
+      await cvVersionRepository.update(
+        { cvId: sourceCv.id, isCurrent: true },
+        { isCurrent: false },
+      );
+
+      const latestVersion = await cvVersionRepository.findOne({
+        where: { cvId: sourceCv.id },
+        order: { versionNumber: 'DESC' },
+      });
+
+      const nextVersionNumber = (latestVersion?.versionNumber ?? 0) + 1;
+
+      const nextTargetRole =
+        updateManualCvVersionDto.targetRole?.trim() ?? sourceVersion.targetRole;
+
+      const nextSummaryText =
+        updateManualCvVersionDto.summaryText?.trim() ?? sourceVersion.summaryText;
+
+      const nextSkillsText =
+        updateManualCvVersionDto.skillsText?.trim() ??
+        this.stringifySkillList(updateManualCvVersionDto.skills) ??
+        sourceVersion.skillsText;
+
+      const newVersion = await cvVersionRepository.save(
+        cvVersionRepository.create({
+          cvId: sourceCv.id,
+          versionNumber: nextVersionNumber,
+          versionType: CvVersionType.MANUAL_EDIT,
+          targetRole: nextTargetRole,
+          jobDescription:
+            updateManualCvVersionDto.jobDescription?.trim() ??
+            sourceVersion.jobDescription,
+          summaryText: nextSummaryText,
+          skillsText: nextSkillsText,
+          stylePreset:
+            updateManualCvVersionDto.stylePreset ??
+            sourceVersion.stylePreset ??
+            CvStylePreset.ATS,
+          generatedFileUrl: null,
+          generatedFileFormat: null,
+          isCurrent: true,
+          createdByProcess: CreatedByProcess.MANUAL,
+        }),
+      );
+
+      await cvRepository.update(sourceCv.id, {
+        title: updateManualCvVersionDto.title?.trim() ?? sourceCv.title,
+        currentVersionId: newVersion.id,
+        targetRole: nextTargetRole,
+        sourceType:
+          sourceCv.sourceType === CvSourceType.IMPROVED
+            ? CvSourceType.MIXED
+            : sourceCv.sourceType,
+      });
+
+      const sourcePersonalDetail = sourceVersion.personalDetail;
+
+      await cvPersonalDetailsRepository.save(
+        cvPersonalDetailsRepository.create({
+          cvVersionId: newVersion.id,
+          fullName:
+            updateManualCvVersionDto.personalDetails?.fullName?.trim() ??
+            sourcePersonalDetail?.fullName ??
+            '',
+          email:
+            updateManualCvVersionDto.personalDetails?.email?.trim().toLowerCase() ??
+            sourcePersonalDetail?.email ??
+            '',
+          phone:
+            updateManualCvVersionDto.personalDetails?.phone?.trim() ??
+            sourcePersonalDetail?.phone ??
+            null,
+          location:
+            updateManualCvVersionDto.personalDetails?.location?.trim() ??
+            sourcePersonalDetail?.location ??
+            null,
+          professionalSummary:
+            updateManualCvVersionDto.personalDetails?.professionalSummary?.trim() ??
+            sourcePersonalDetail?.professionalSummary ??
+            null,
+        }),
+      );
+
+      if (updateManualCvVersionDto.workExperiences) {
+        if (updateManualCvVersionDto.workExperiences.length) {
+          await cvWorkExperiencesRepository.save(
+            updateManualCvVersionDto.workExperiences.map((workExperience, index) =>
+              cvWorkExperiencesRepository.create({
+                cvVersionId: newVersion.id,
+                companyName: workExperience.companyName.trim(),
+                jobTitle: workExperience.jobTitle.trim(),
+                periodLabel: workExperience.periodLabel.trim(),
+                startDate: workExperience.startDate?.trim() ?? null,
+                endDate: workExperience.endDate?.trim() ?? null,
+                isCurrent: workExperience.isCurrent ?? false,
+                description: workExperience.description?.trim() ?? null,
+                displayOrder: index + 1,
+              }),
+            ),
+          );
+        }
+      } else if (sourceVersion.workExperiences.length) {
+        await cvWorkExperiencesRepository.save(
+          sourceVersion.workExperiences.map((workExperience) =>
+            cvWorkExperiencesRepository.create({
+              cvVersionId: newVersion.id,
+              companyName: workExperience.companyName,
+              jobTitle: workExperience.jobTitle,
+              periodLabel: workExperience.periodLabel,
+              startDate: workExperience.startDate,
+              endDate: workExperience.endDate,
+              isCurrent: workExperience.isCurrent,
+              description: workExperience.description,
+              displayOrder: workExperience.displayOrder,
+            }),
+          ),
+        );
+      }
+
+      if (updateManualCvVersionDto.educationEntries) {
+        if (updateManualCvVersionDto.educationEntries.length) {
+          await cvEducationEntriesRepository.save(
+            updateManualCvVersionDto.educationEntries.map((educationEntry, index) =>
+              cvEducationEntriesRepository.create({
+                cvVersionId: newVersion.id,
+                institutionName: educationEntry.institutionName.trim(),
+                degreeTitle: educationEntry.degreeTitle.trim(),
+                periodLabel: educationEntry.periodLabel.trim(),
+                startDate: educationEntry.startDate?.trim() ?? null,
+                endDate: educationEntry.endDate?.trim() ?? null,
+                displayOrder: index + 1,
+              }),
+            ),
+          );
+        }
+      } else if (sourceVersion.educationEntries.length) {
+        await cvEducationEntriesRepository.save(
+          sourceVersion.educationEntries.map((educationEntry) =>
+            cvEducationEntriesRepository.create({
+              cvVersionId: newVersion.id,
+              institutionName: educationEntry.institutionName,
+              degreeTitle: educationEntry.degreeTitle,
+              periodLabel: educationEntry.periodLabel,
+              startDate: educationEntry.startDate,
+              endDate: educationEntry.endDate,
+              displayOrder: educationEntry.displayOrder,
+            }),
+          ),
+        );
+      }
+
+      if (updateManualCvVersionDto.skills) {
+        await this.attachSkillsToVersion(
+          newVersion.id,
+          updateManualCvVersionDto.skills,
+          skillsRepository,
+          cvVersionSkillsRepository,
+        );
+      } else if (sourceVersion.versionSkills.length) {
+        await cvVersionSkillsRepository.save(
+          sourceVersion.versionSkills.map((versionSkill) =>
+            cvVersionSkillsRepository.create({
+              cvVersionId: newVersion.id,
+              skillId: versionSkill.skillId,
+              displayOrder: versionSkill.displayOrder,
+            }),
+          ),
+        );
+      }
+    });
+
+    return this.getCv(userId, cvId);
+  }
+
   private async findCvOrFail(userId: string, cvId: string) {
     const cv = await this.cvsRepository.findOne({
       where: { id: cvId, userId },
@@ -407,12 +609,12 @@ export class CvsService {
       });
 
       skill ??= await skillsRepository.save(
-          skillsRepository.create({
-            name: skillName,
-            normalizedName,
-            category: null,
-          }),
-        );
+        skillsRepository.create({
+          name: skillName,
+          normalizedName,
+          category: null,
+        }),
+      );
 
       await cvVersionSkillsRepository.save(
         cvVersionSkillsRepository.create({
@@ -486,6 +688,7 @@ export class CvsService {
       versionNumber: version.versionNumber,
       versionType: version.versionType,
       targetRole: version.targetRole,
+      stylePreset: version.stylePreset,
       isCurrent: version.isCurrent,
       createdByProcess: version.createdByProcess,
       generatedFileUrl: version.generatedFileUrl,
