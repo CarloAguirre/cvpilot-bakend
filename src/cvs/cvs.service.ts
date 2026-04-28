@@ -263,9 +263,10 @@ export class CvsService {
         currentVersionId: newVersion.id,
         targetRole: createImprovedCvVersionDto.targetRole.trim(),
         sourceType:
-          sourceCv.sourceType === CvSourceType.CREATED
+          createImprovedCvVersionDto.resultSourceType ??
+          (sourceCv.sourceType === CvSourceType.CREATED
             ? CvSourceType.MIXED
-            : sourceCv.sourceType,
+            : sourceCv.sourceType),
       });
 
       if (sourceVersion.personalDetail) {
@@ -342,6 +343,7 @@ export class CvsService {
             userId,
           },
           {
+            cvId: sourceCv.id,
             status: CvImprovementRequestStatus.COMPLETED,
             resultCvVersionId: newVersion.id,
             errorMessage: null,
@@ -412,8 +414,10 @@ export class CvsService {
             updateManualCvVersionDto.stylePreset ??
             sourceVersion.stylePreset ??
             CvStylePreset.ATS,
-          generatedFileUrl: null,
-          generatedFileFormat: null,
+          generatedFileUrl:
+            updateManualCvVersionDto.generatedFileUrl?.trim() ?? null,
+          generatedFileFormat:
+            updateManualCvVersionDto.generatedFileFormat ?? null,
           isCurrent: true,
           createdByProcess: CreatedByProcess.MANUAL,
         }),

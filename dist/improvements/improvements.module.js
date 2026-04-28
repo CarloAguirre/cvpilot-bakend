@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImprovementsModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const cvs_module_1 = require("../cvs/cvs.module");
 const cv_version_entity_1 = require("../cvs/entities/cv-version.entity");
 const cv_entity_1 = require("../cvs/entities/cv.entity");
 const uploaded_file_entity_1 = require("../files/entities/uploaded-file.entity");
@@ -21,6 +22,7 @@ exports.ImprovementsModule = ImprovementsModule;
 exports.ImprovementsModule = ImprovementsModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            cvs_module_1.CvsModule,
             typeorm_1.TypeOrmModule.forFeature([
                 cv_improvement_request_entity_1.CvImprovementRequest,
                 uploaded_file_entity_1.UploadedFile,

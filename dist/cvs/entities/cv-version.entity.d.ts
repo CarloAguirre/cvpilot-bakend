@@ -1,5 +1,5 @@
 import { CreatedUpdatedEntity } from '../../common/entities/timestamped.entity';
-import { CreatedByProcess, CvVersionType, GeneratedFileFormat } from '../../common/enums/database.enums';
+import { CreatedByProcess, CvStylePreset, CvVersionType, GeneratedFileFormat } from '../../common/enums/database.enums';
 import { SystemEvent } from '../../events/entities/system-event.entity';
 import { CvImprovementRequest } from '../../improvements/entities/cv-improvement-request.entity';
 import { Cv } from './cv.entity';
@@ -16,6 +16,7 @@ export declare class CvVersion extends CreatedUpdatedEntity {
     jobDescription: string | null;
     summaryText: string | null;
     skillsText: string | null;
+    stylePreset: CvStylePreset;
     generatedFileUrl: string | null;
     generatedFileFormat: GeneratedFileFormat | null;
     isCurrent: boolean;

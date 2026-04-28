@@ -1,4 +1,6 @@
 import { Repository } from 'typeorm';
+import { CvImprovementRequestStatus } from '../common/enums/database.enums';
+import { CvGenerationWorkflowService } from '../cvs/generation/cv-generation-workflow.service';
 import { CvVersion } from '../cvs/entities/cv-version.entity';
 import { Cv } from '../cvs/entities/cv.entity';
 import { UploadedFile } from '../files/entities/uploaded-file.entity';
@@ -6,11 +8,12 @@ import { CreateCvImprovementRequestDto } from './dto/create-cv-improvement-reque
 import { UpdateCvImprovementRequestDto } from './dto/update-cv-improvement-request.dto';
 import { CvImprovementRequest } from './entities/cv-improvement-request.entity';
 export declare class ImprovementsService {
+    private readonly cvGenerationWorkflowService;
     readonly cvImprovementRequestsRepository: Repository<CvImprovementRequest>;
     readonly uploadedFilesRepository: Repository<UploadedFile>;
     readonly cvsRepository: Repository<Cv>;
     readonly cvVersionsRepository: Repository<CvVersion>;
-    constructor(cvImprovementRequestsRepository: Repository<CvImprovementRequest>, uploadedFilesRepository: Repository<UploadedFile>, cvsRepository: Repository<Cv>, cvVersionsRepository: Repository<CvVersion>);
+    constructor(cvGenerationWorkflowService: CvGenerationWorkflowService, cvImprovementRequestsRepository: Repository<CvImprovementRequest>, uploadedFilesRepository: Repository<UploadedFile>, cvsRepository: Repository<Cv>, cvVersionsRepository: Repository<CvVersion>);
     listRequests(userId: string): Promise<{
         id: string;
         userId: string;
@@ -18,7 +21,7 @@ export declare class ImprovementsService {
         uploadedFileId: string;
         targetRole: string;
         jobDescription: string | null;
-        status: import("../common/enums/database.enums").CvImprovementRequestStatus;
+        status: CvImprovementRequestStatus;
         errorMessage: string | null;
         resultCvVersionId: string | null;
         cv: {
@@ -55,7 +58,7 @@ export declare class ImprovementsService {
         uploadedFileId: string;
         targetRole: string;
         jobDescription: string | null;
-        status: import("../common/enums/database.enums").CvImprovementRequestStatus;
+        status: CvImprovementRequestStatus;
         errorMessage: string | null;
         resultCvVersionId: string | null;
         cv: {
@@ -92,7 +95,7 @@ export declare class ImprovementsService {
         uploadedFileId: string;
         targetRole: string;
         jobDescription: string | null;
-        status: import("../common/enums/database.enums").CvImprovementRequestStatus;
+        status: CvImprovementRequestStatus;
         errorMessage: string | null;
         resultCvVersionId: string | null;
         cv: {
@@ -121,6 +124,152 @@ export declare class ImprovementsService {
         } | null;
         createdAt: Date;
         updatedAt: Date;
+    }>;
+    processRequest(userId: string, requestId: string): Promise<{
+        id: string;
+        userId: string;
+        title: string | null;
+        targetRole: string;
+        sourceType: import("../common/enums/database.enums").CvSourceType;
+        currentVersionId: string | null;
+        isArchived: boolean;
+        currentVersion: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: import("../common/enums/database.enums").CvVersionType;
+            targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        } | null;
+        versions: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: import("../common/enums/database.enums").CvVersionType;
+            targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
     }>;
     private toRequestResponse;
 }

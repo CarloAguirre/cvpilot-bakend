@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 import {
   CreatedByProcess,
+  CvSourceType,
   CvStylePreset,
   GeneratedFileFormat,
 } from '../../common/enums/database.enums';
@@ -43,6 +44,10 @@ export class CreateImprovedCvVersionDto {
   @IsOptional()
   @IsEnum(CreatedByProcess)
   createdByProcess?: CreatedByProcess;
+
+  @IsOptional()
+  @IsEnum(CvSourceType)
+  resultSourceType?: CvSourceType;
 
   @IsOptional()
   @IsString()

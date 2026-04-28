@@ -16,16 +16,20 @@ exports.ImprovementsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const database_enums_1 = require("../common/enums/database.enums");
+const cv_generation_workflow_service_1 = require("../cvs/generation/cv-generation-workflow.service");
 const cv_version_entity_1 = require("../cvs/entities/cv-version.entity");
 const cv_entity_1 = require("../cvs/entities/cv.entity");
 const uploaded_file_entity_1 = require("../files/entities/uploaded-file.entity");
 const cv_improvement_request_entity_1 = require("./entities/cv-improvement-request.entity");
 let ImprovementsService = class ImprovementsService {
+    cvGenerationWorkflowService;
     cvImprovementRequestsRepository;
     uploadedFilesRepository;
     cvsRepository;
     cvVersionsRepository;
-    constructor(cvImprovementRequestsRepository, uploadedFilesRepository, cvsRepository, cvVersionsRepository) {
+    constructor(cvGenerationWorkflowService, cvImprovementRequestsRepository, uploadedFilesRepository, cvsRepository, cvVersionsRepository) {
+        this.cvGenerationWorkflowService = cvGenerationWorkflowService;
         this.cvImprovementRequestsRepository = cvImprovementRequestsRepository;
         this.uploadedFilesRepository = uploadedFilesRepository;
         this.cvsRepository = cvsRepository;
@@ -122,6 +126,38 @@ let ImprovementsService = class ImprovementsService {
         }
         return this.toRequestResponse(hydratedRequest);
     }
+    async processRequest(userId, requestId) {
+        const request = await this.cvImprovementRequestsRepository.findOne({
+            where: { id: requestId, userId },
+            relations: {
+                cv: true,
+                uploadedFile: true,
+                resultCvVersion: true,
+            },
+        });
+        if (!request) {
+            throw new common_1.NotFoundException('Improvement request not found');
+        }
+        if (request.status === database_enums_1.CvImprovementRequestStatus.PROCESSING) {
+            throw new common_1.BadRequestException('Improvement request is already processing');
+        }
+        if (request.status === database_enums_1.CvImprovementRequestStatus.COMPLETED) {
+            throw new common_1.BadRequestException('Improvement request has already been processed');
+        }
+        request.status = database_enums_1.CvImprovementRequestStatus.PROCESSING;
+        request.errorMessage = null;
+        await this.cvImprovementRequestsRepository.save(request);
+        try {
+            return await this.cvGenerationWorkflowService.processImprovementRequest(userId, request);
+        }
+        catch (error) {
+            request.status = database_enums_1.CvImprovementRequestStatus.FAILED;
+            request.errorMessage =
+                error instanceof Error ? error.message : 'Improvement processing failed';
+            await this.cvImprovementRequestsRepository.save(request);
+            throw error;
+        }
+    }
     toRequestResponse(request) {
         return {
             id: request.id,
@@ -171,11 +207,12 @@ let ImprovementsService = class ImprovementsService {
 exports.ImprovementsService = ImprovementsService;
 exports.ImprovementsService = ImprovementsService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(cv_improvement_request_entity_1.CvImprovementRequest)),
-    __param(1, (0, typeorm_1.InjectRepository)(uploaded_file_entity_1.UploadedFile)),
-    __param(2, (0, typeorm_1.InjectRepository)(cv_entity_1.Cv)),
-    __param(3, (0, typeorm_1.InjectRepository)(cv_version_entity_1.CvVersion)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
+    __param(1, (0, typeorm_1.InjectRepository)(cv_improvement_request_entity_1.CvImprovementRequest)),
+    __param(2, (0, typeorm_1.InjectRepository)(uploaded_file_entity_1.UploadedFile)),
+    __param(3, (0, typeorm_1.InjectRepository)(cv_entity_1.Cv)),
+    __param(4, (0, typeorm_1.InjectRepository)(cv_version_entity_1.CvVersion)),
+    __metadata("design:paramtypes", [cv_generation_workflow_service_1.CvGenerationWorkflowService,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository])

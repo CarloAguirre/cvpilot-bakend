@@ -17,9 +17,11 @@ class CreateImprovedCvVersionDto {
     jobDescription;
     summaryText;
     skillsText;
+    stylePreset;
     generatedFileUrl;
     generatedFileFormat;
     createdByProcess;
+    resultSourceType;
     improvementRequestId;
     skills;
 }
@@ -46,6 +48,11 @@ __decorate([
 ], CreateImprovedCvVersionDto.prototype, "skillsText", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(database_enums_1.CvStylePreset),
+    __metadata("design:type", String)
+], CreateImprovedCvVersionDto.prototype, "stylePreset", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateImprovedCvVersionDto.prototype, "generatedFileUrl", void 0);
@@ -59,6 +66,11 @@ __decorate([
     (0, class_validator_1.IsEnum)(database_enums_1.CreatedByProcess),
     __metadata("design:type", String)
 ], CreateImprovedCvVersionDto.prototype, "createdByProcess", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(database_enums_1.CvSourceType),
+    __metadata("design:type", String)
+], CreateImprovedCvVersionDto.prototype, "resultSourceType", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

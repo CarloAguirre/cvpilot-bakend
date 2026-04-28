@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CvImprovementRequestStatus } from '../common/enums/database.enums';
+import { CvGenerationWorkflowService } from '../cvs/generation/cv-generation-workflow.service';
 import { CvVersion } from '../cvs/entities/cv-version.entity';
 import { Cv } from '../cvs/entities/cv.entity';
 import { UploadedFile } from '../files/entities/uploaded-file.entity';
@@ -15,6 +17,7 @@ import { CvImprovementRequest } from './entities/cv-improvement-request.entity';
 @Injectable()
 export class ImprovementsService {
   constructor(
+    private readonly cvGenerationWorkflowService: CvGenerationWorkflowService,
     @InjectRepository(CvImprovementRequest)
     readonly cvImprovementRequestsRepository: Repository<CvImprovementRequest>,
     @InjectRepository(UploadedFile)
@@ -143,6 +146,48 @@ export class ImprovementsService {
     }
 
     return this.toRequestResponse(hydratedRequest);
+  }
+
+  async processRequest(userId: string, requestId: string) {
+    const request = await this.cvImprovementRequestsRepository.findOne({
+      where: { id: requestId, userId },
+      relations: {
+        cv: true,
+        uploadedFile: true,
+        resultCvVersion: true,
+      },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Improvement request not found');
+    }
+
+    if (request.status === CvImprovementRequestStatus.PROCESSING) {
+      throw new BadRequestException('Improvement request is already processing');
+    }
+
+    if (request.status === CvImprovementRequestStatus.COMPLETED) {
+      throw new BadRequestException(
+        'Improvement request has already been processed',
+      );
+    }
+
+    request.status = CvImprovementRequestStatus.PROCESSING;
+    request.errorMessage = null;
+    await this.cvImprovementRequestsRepository.save(request);
+
+    try {
+      return await this.cvGenerationWorkflowService.processImprovementRequest(
+        userId,
+        request,
+      );
+    } catch (error) {
+      request.status = CvImprovementRequestStatus.FAILED;
+      request.errorMessage =
+        error instanceof Error ? error.message : 'Improvement processing failed';
+      await this.cvImprovementRequestsRepository.save(request);
+      throw error;
+    }
   }
 
   private toRequestResponse(request: CvImprovementRequest) {

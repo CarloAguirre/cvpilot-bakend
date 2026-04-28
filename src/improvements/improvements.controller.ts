@@ -24,6 +24,14 @@ export class ImprovementsController {
     );
   }
 
+  @Post(':requestId/process')
+  processRequest(
+    @CurrentUser('sub') userId: string,
+    @Param('requestId') requestId: string,
+  ) {
+    return this.improvementsService.processRequest(userId, requestId);
+  }
+
   @Patch(':requestId')
   updateRequest(
     @CurrentUser('sub') userId: string,

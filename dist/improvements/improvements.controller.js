@@ -29,6 +29,9 @@ let ImprovementsController = class ImprovementsController {
     createRequest(userId, createCvImprovementRequestDto) {
         return this.improvementsService.createRequest(userId, createCvImprovementRequestDto);
     }
+    processRequest(userId, requestId) {
+        return this.improvementsService.processRequest(userId, requestId);
+    }
     updateRequest(userId, requestId, updateCvImprovementRequestDto) {
         return this.improvementsService.updateRequest(userId, requestId, updateCvImprovementRequestDto);
     }
@@ -49,6 +52,14 @@ __decorate([
     __metadata("design:paramtypes", [String, create_cv_improvement_request_dto_1.CreateCvImprovementRequestDto]),
     __metadata("design:returntype", void 0)
 ], ImprovementsController.prototype, "createRequest", null);
+__decorate([
+    (0, common_1.Post)(':requestId/process'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),
+    __param(1, (0, common_1.Param)('requestId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], ImprovementsController.prototype, "processRequest", null);
 __decorate([
     (0, common_1.Patch)(':requestId'),
     __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),

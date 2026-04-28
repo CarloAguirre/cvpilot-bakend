@@ -3,8 +3,10 @@ import { Repository } from 'typeorm';
 import { UserStatus } from '../common/enums/database.enums';
 import { UserSetting } from '../users/entities/user-setting.entity';
 import { User } from '../users/entities/user.entity';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 export declare class AuthService {
     private readonly usersRepository;
     private readonly userSettingsRepository;
@@ -33,6 +35,18 @@ export declare class AuthService {
             createdAt: Date;
             updatedAt: Date;
         };
+    }>;
+    forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{
+        message: string;
+        resetToken?: undefined;
+        expiresAt?: undefined;
+    } | {
+        message: string;
+        resetToken: string;
+        expiresAt: Date;
+    }>;
+    resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{
+        message: string;
     }>;
     getCurrentUser(userId: string): Promise<{
         id: string;

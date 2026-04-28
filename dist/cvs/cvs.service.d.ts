@@ -1,8 +1,9 @@
 import { DataSource, Repository } from 'typeorm';
-import { CreatedByProcess, CvSourceType, CvVersionType } from '../common/enums/database.enums';
+import { CreatedByProcess, CvSourceType, CvStylePreset, CvVersionType } from '../common/enums/database.enums';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { CreateImprovedCvVersionDto } from './dto/create-improved-cv-version.dto';
 import { UpdateCvArchiveDto } from './dto/update-cv-archive.dto';
+import { UpdateManualCvVersionDto } from './dto/update-manual-cv-version.dto';
 import { CvEducationEntry } from './entities/cv-education-entry.entity';
 import { CvPersonalDetail } from './entities/cv-personal-detail.entity';
 import { CvVersionSkill } from './entities/cv-version-skill.entity';
@@ -35,6 +36,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -113,6 +115,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -179,6 +182,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -200,6 +204,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -223,6 +228,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -301,6 +307,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -367,6 +374,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -445,6 +453,7 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;
@@ -511,6 +520,153 @@ export declare class CvsService {
             versionNumber: number;
             versionType: CvVersionType;
             targetRole: string;
+            stylePreset: CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+    }>;
+    createManualEditedVersion(userId: string, cvId: string, updateManualCvVersionDto: UpdateManualCvVersionDto): Promise<{
+        id: string;
+        userId: string;
+        title: string | null;
+        targetRole: string;
+        sourceType: CvSourceType;
+        currentVersionId: string | null;
+        isArchived: boolean;
+        currentVersion: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: CvVersionType;
+            targetRole: string;
+            stylePreset: CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        } | null;
+        versions: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: CvVersionType;
+            targetRole: string;
+            stylePreset: CvStylePreset;
             isCurrent: boolean;
             createdByProcess: CreatedByProcess;
             generatedFileUrl: string | null;

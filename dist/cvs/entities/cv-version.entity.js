@@ -29,6 +29,7 @@ let CvVersion = class CvVersion extends timestamped_entity_1.CreatedUpdatedEntit
     jobDescription;
     summaryText;
     skillsText;
+    stylePreset;
     generatedFileUrl;
     generatedFileFormat;
     isCurrent;
@@ -74,6 +75,15 @@ __decorate([
     (0, typeorm_1.Column)({ name: 'skills_text', type: 'text', nullable: true }),
     __metadata("design:type", Object)
 ], CvVersion.prototype, "skillsText", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'style_preset',
+        type: 'varchar',
+        length: 20,
+        default: database_enums_1.CvStylePreset.ATS,
+    }),
+    __metadata("design:type", String)
+], CvVersion.prototype, "stylePreset", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'generated_file_url', type: 'text', nullable: true }),
     __metadata("design:type", Object)

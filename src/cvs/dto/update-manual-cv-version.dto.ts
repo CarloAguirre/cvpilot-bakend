@@ -10,7 +10,10 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CvStylePreset } from '../../common/enums/database.enums';
+import {
+  CvStylePreset,
+  GeneratedFileFormat,
+} from '../../common/enums/database.enums';
 
 export class ManualEditCvPersonalDetailsDto {
   @IsOptional()
@@ -115,6 +118,14 @@ export class UpdateManualCvVersionDto {
   @IsOptional()
   @IsEnum(CvStylePreset)
   stylePreset?: CvStylePreset;
+
+  @IsOptional()
+  @IsString()
+  generatedFileUrl?: string;
+
+  @IsOptional()
+  @IsEnum(GeneratedFileFormat)
+  generatedFileFormat?: GeneratedFileFormat;
 
   @IsOptional()
   @ValidateNested()

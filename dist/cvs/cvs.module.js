@@ -17,6 +17,12 @@ const cv_version_skill_entity_1 = require("./entities/cv-version-skill.entity");
 const cv_version_entity_1 = require("./entities/cv-version.entity");
 const cv_work_experience_entity_1 = require("./entities/cv-work-experience.entity");
 const cv_entity_1 = require("./entities/cv.entity");
+const cv_generation_workflow_service_1 = require("./generation/cv-generation-workflow.service");
+const cv_document_text_extractor_service_1 = require("./generation/cv-document-text-extractor.service");
+const cv_pdf_render_service_1 = require("./generation/cv-pdf-render.service");
+const cv_prompt_builder_service_1 = require("./generation/cv-prompt-builder.service");
+const generated_documents_storage_service_1 = require("./generation/generated-documents-storage.service");
+const openai_cv_generator_service_1 = require("./generation/openai-cv-generator.service");
 const skill_entity_1 = require("./entities/skill.entity");
 let CvsModule = class CvsModule {
 };
@@ -35,8 +41,16 @@ exports.CvsModule = CvsModule = __decorate([
             ]),
         ],
         controllers: [cvs_controller_1.CvsController],
-        providers: [cvs_service_1.CvsService],
-        exports: [typeorm_1.TypeOrmModule, cvs_service_1.CvsService],
+        providers: [
+            cvs_service_1.CvsService,
+            cv_document_text_extractor_service_1.CvDocumentTextExtractorService,
+            cv_generation_workflow_service_1.CvGenerationWorkflowService,
+            cv_pdf_render_service_1.CvPdfRenderService,
+            cv_prompt_builder_service_1.CvPromptBuilderService,
+            generated_documents_storage_service_1.GeneratedDocumentsStorageService,
+            openai_cv_generator_service_1.OpenAiCvGeneratorService,
+        ],
+        exports: [typeorm_1.TypeOrmModule, cvs_service_1.CvsService, cv_generation_workflow_service_1.CvGenerationWorkflowService],
     })
 ], CvsModule);
 //# sourceMappingURL=cvs.module.js.map

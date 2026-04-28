@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CvsModule } from '../cvs/cvs.module';
 import { CvVersion } from '../cvs/entities/cv-version.entity';
 import { Cv } from '../cvs/entities/cv.entity';
 import { UploadedFile } from '../files/entities/uploaded-file.entity';
@@ -9,6 +10,7 @@ import { ImprovementsService } from './improvements.service';
 
 @Module({
   imports: [
+    CvsModule,
     TypeOrmModule.forFeature([
       CvImprovementRequest,
       UploadedFile,

@@ -25,6 +25,8 @@ let User = class User extends timestamped_entity_1.SoftDeleteEntity {
     fullName;
     email;
     passwordHash;
+    passwordResetTokenHash;
+    passwordResetExpiresAt;
     status;
     lastLoginAt;
     setting;
@@ -52,6 +54,22 @@ __decorate([
     (0, typeorm_1.Column)({ name: 'password_hash', type: 'text' }),
     __metadata("design:type", String)
 ], User.prototype, "passwordHash", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'password_reset_token_hash',
+        type: 'text',
+        nullable: true,
+    }),
+    __metadata("design:type", Object)
+], User.prototype, "passwordResetTokenHash", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'password_reset_expires_at',
+        type: 'timestamptz',
+        nullable: true,
+    }),
+    __metadata("design:type", Object)
+], User.prototype, "passwordResetExpiresAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         name: 'status',

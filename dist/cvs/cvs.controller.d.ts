@@ -1,10 +1,14 @@
 import { CreateCvDto } from './dto/create-cv.dto';
+import { GenerateCvFromFormDto } from './dto/generate-cv-from-form.dto';
 import { CreateImprovedCvVersionDto } from './dto/create-improved-cv-version.dto';
 import { UpdateCvArchiveDto } from './dto/update-cv-archive.dto';
+import { UpdateManualCvVersionDto } from './dto/update-manual-cv-version.dto';
+import { CvGenerationWorkflowService } from './generation/cv-generation-workflow.service';
 import { CvsService } from './cvs.service';
 export declare class CvsController {
     private readonly cvsService;
-    constructor(cvsService: CvsService);
+    private readonly cvGenerationWorkflowService;
+    constructor(cvsService: CvsService, cvGenerationWorkflowService: CvGenerationWorkflowService);
     listUserCvs(userId: string): Promise<{
         id: string;
         userId: string;
@@ -20,6 +24,7 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -98,6 +103,7 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -164,6 +170,153 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+    }>;
+    generateFromForm(userId: string, generateCvFromFormDto: GenerateCvFromFormDto): Promise<{
+        id: string;
+        userId: string;
+        title: string | null;
+        targetRole: string;
+        sourceType: import("../common/enums/database.enums").CvSourceType;
+        currentVersionId: string | null;
+        isArchived: boolean;
+        currentVersion: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: import("../common/enums/database.enums").CvVersionType;
+            targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        } | null;
+        versions: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: import("../common/enums/database.enums").CvVersionType;
+            targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -242,6 +395,7 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -308,6 +462,7 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -329,6 +484,7 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -352,6 +508,7 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -430,6 +587,7 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;
@@ -496,6 +654,153 @@ export declare class CvsController {
             versionNumber: number;
             versionType: import("../common/enums/database.enums").CvVersionType;
             targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+    }>;
+    createManualEditedVersion(userId: string, cvId: string, updateManualCvVersionDto: UpdateManualCvVersionDto): Promise<{
+        id: string;
+        userId: string;
+        title: string | null;
+        targetRole: string;
+        sourceType: import("../common/enums/database.enums").CvSourceType;
+        currentVersionId: string | null;
+        isArchived: boolean;
+        currentVersion: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: import("../common/enums/database.enums").CvVersionType;
+            targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
+            isCurrent: boolean;
+            createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
+            generatedFileUrl: string | null;
+            generatedFileFormat: import("../common/enums/database.enums").GeneratedFileFormat | null;
+            createdAt: Date;
+            updatedAt: Date;
+        } | null;
+        versions: {
+            jobDescription: string | null;
+            summaryText: string | null;
+            skillsText: string | null;
+            personalDetail: {
+                id: string;
+                cvVersionId: string;
+                fullName: string;
+                email: string;
+                phone: string | null;
+                location: string | null;
+                professionalSummary: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+            } | null;
+            workExperiences: {
+                id: string;
+                cvVersionId: string;
+                companyName: string;
+                jobTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                isCurrent: boolean;
+                description: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            educationEntries: {
+                id: string;
+                cvVersionId: string;
+                institutionName: string;
+                degreeTitle: string;
+                periodLabel: string;
+                startDate: string | null;
+                endDate: string | null;
+                displayOrder: number;
+                createdAt: Date;
+                updatedAt: Date;
+            }[];
+            skills: {
+                id: string;
+                cvVersionId: string;
+                skillId: string;
+                displayOrder: number;
+                skill: {
+                    id: string;
+                    name: string;
+                    normalizedName: string;
+                    category: string | null;
+                    createdAt: Date;
+                } | null;
+            }[];
+            id: string;
+            cvId: string;
+            versionNumber: number;
+            versionType: import("../common/enums/database.enums").CvVersionType;
+            targetRole: string;
+            stylePreset: import("../common/enums/database.enums").CvStylePreset;
             isCurrent: boolean;
             createdByProcess: import("../common/enums/database.enums").CreatedByProcess;
             generatedFileUrl: string | null;

@@ -1,14 +1,19 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateCvDto } from './dto/create-cv.dto';
+import { GenerateCvFromFormDto } from './dto/generate-cv-from-form.dto';
 import { CreateImprovedCvVersionDto } from './dto/create-improved-cv-version.dto';
 import { UpdateCvArchiveDto } from './dto/update-cv-archive.dto';
 import { UpdateManualCvVersionDto } from './dto/update-manual-cv-version.dto';
+import { CvGenerationWorkflowService } from './generation/cv-generation-workflow.service';
 import { CvsService } from './cvs.service';
 
 @Controller('cvs')
 export class CvsController {
-  constructor(private readonly cvsService: CvsService) {}
+  constructor(
+    private readonly cvsService: CvsService,
+    private readonly cvGenerationWorkflowService: CvGenerationWorkflowService,
+  ) {}
 
   @Get()
   listUserCvs(@CurrentUser('sub') userId: string) {
@@ -21,6 +26,17 @@ export class CvsController {
     @Body() createCvDto: CreateCvDto,
   ) {
     return this.cvsService.createInitialCv(userId, createCvDto);
+  }
+
+  @Post('generate-from-form')
+  generateFromForm(
+    @CurrentUser('sub') userId: string,
+    @Body() generateCvFromFormDto: GenerateCvFromFormDto,
+  ) {
+    return this.cvGenerationWorkflowService.generateFromForm(
+      userId,
+      generateCvFromFormDto,
+    );
   }
 
   @Get(':cvId')
@@ -68,7 +84,7 @@ export class CvsController {
     @Param('cvId') cvId: string,
     @Body() updateManualCvVersionDto: UpdateManualCvVersionDto,
   ) {
-    return this.cvsService.createManualEditedVersion(
+    return this.cvGenerationWorkflowService.createManualEditedVersion(
       userId,
       cvId,
       updateManualCvVersionDto,

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuditActionType = exports.CvImprovementRequestStatus = exports.GeneratedFileFormat = exports.CreatedByProcess = exports.CvVersionType = exports.CvSourceType = exports.UserStatus = void 0;
+exports.AuditActionType = exports.CvImprovementRequestStatus = exports.CvStylePreset = exports.GeneratedFileFormat = exports.CreatedByProcess = exports.CvVersionType = exports.CvSourceType = exports.UserStatus = void 0;
 var UserStatus;
 (function (UserStatus) {
     UserStatus["ACTIVE"] = "active";
@@ -29,6 +29,12 @@ var GeneratedFileFormat;
     GeneratedFileFormat["PDF"] = "pdf";
     GeneratedFileFormat["DOCX"] = "docx";
 })(GeneratedFileFormat || (exports.GeneratedFileFormat = GeneratedFileFormat = {}));
+var CvStylePreset;
+(function (CvStylePreset) {
+    CvStylePreset["ATS"] = "ats";
+    CvStylePreset["HARVARD"] = "harvard";
+    CvStylePreset["MODERNO"] = "moderno";
+})(CvStylePreset || (exports.CvStylePreset = CvStylePreset = {}));
 var CvImprovementRequestStatus;
 (function (CvImprovementRequestStatus) {
     CvImprovementRequestStatus["PENDING"] = "pending";

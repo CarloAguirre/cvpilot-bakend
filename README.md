@@ -24,6 +24,16 @@
 
 Backend base en NestJS + TypeORM para el esquema definido en `schema.sql`.
 
+## Documentacion adicional
+
+- `docs/cv-generator/README.md`: resumen del modulo 1.
+- `docs/cv-generator/architecture.md`: arquitectura objetivo del generador de CV.
+- `docs/cv-generator/routes.md`: rutas actuales y rutas propuestas.
+- `docs/cv-generator/implementation-plan.md`: roadmap de implementacion por fases.
+- `docs/cv-improvement/README.md`: resumen del modulo 2.
+- `docs/cv-improvement/architecture.md`: arquitectura implementada del flujo de mejora.
+- `docs/cv-improvement/routes.md`: rutas actuales del modulo 2.
+
 ## Módulos incluidos
 
 - `users`: usuarios y preferencias.
@@ -71,6 +81,7 @@ Prefijo global: `/api`
 - `POST /api/files/upload`: subir archivo real por multipart y registrar metadata.
 - `GET /api/improvement-requests`: listar solicitudes de mejora.
 - `POST /api/improvement-requests`: crear solicitud de mejora.
+- `POST /api/improvement-requests/:requestId/process`: ejecutar mejora sincronica y devolver `CvDetail`.
 - `PATCH /api/improvement-requests/:requestId`: actualizar estado o resultado.
 - `GET /api/reports/dashboard-summary`: resumen para dashboard.
 - `GET /api/reports/by-role`: agregación por cargo.

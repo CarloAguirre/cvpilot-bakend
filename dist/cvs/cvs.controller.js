@@ -16,19 +16,27 @@ exports.CvsController = void 0;
 const common_1 = require("@nestjs/common");
 const current_user_decorator_1 = require("../auth/decorators/current-user.decorator");
 const create_cv_dto_1 = require("./dto/create-cv.dto");
+const generate_cv_from_form_dto_1 = require("./dto/generate-cv-from-form.dto");
 const create_improved_cv_version_dto_1 = require("./dto/create-improved-cv-version.dto");
 const update_cv_archive_dto_1 = require("./dto/update-cv-archive.dto");
+const update_manual_cv_version_dto_1 = require("./dto/update-manual-cv-version.dto");
+const cv_generation_workflow_service_1 = require("./generation/cv-generation-workflow.service");
 const cvs_service_1 = require("./cvs.service");
 let CvsController = class CvsController {
     cvsService;
-    constructor(cvsService) {
+    cvGenerationWorkflowService;
+    constructor(cvsService, cvGenerationWorkflowService) {
         this.cvsService = cvsService;
+        this.cvGenerationWorkflowService = cvGenerationWorkflowService;
     }
     listUserCvs(userId) {
         return this.cvsService.listUserCvs(userId);
     }
     createInitialCv(userId, createCvDto) {
         return this.cvsService.createInitialCv(userId, createCvDto);
+    }
+    generateFromForm(userId, generateCvFromFormDto) {
+        return this.cvGenerationWorkflowService.generateFromForm(userId, generateCvFromFormDto);
     }
     getCv(userId, cvId) {
         return this.cvsService.getCv(userId, cvId);
@@ -41,6 +49,9 @@ let CvsController = class CvsController {
     }
     createImprovedVersion(userId, cvId, createImprovedCvVersionDto) {
         return this.cvsService.createImprovedVersion(userId, cvId, createImprovedCvVersionDto);
+    }
+    createManualEditedVersion(userId, cvId, updateManualCvVersionDto) {
+        return this.cvGenerationWorkflowService.createManualEditedVersion(userId, cvId, updateManualCvVersionDto);
     }
 };
 exports.CvsController = CvsController;
@@ -59,6 +70,14 @@ __decorate([
     __metadata("design:paramtypes", [String, create_cv_dto_1.CreateCvDto]),
     __metadata("design:returntype", void 0)
 ], CvsController.prototype, "createInitialCv", null);
+__decorate([
+    (0, common_1.Post)('generate-from-form'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, generate_cv_from_form_dto_1.GenerateCvFromFormDto]),
+    __metadata("design:returntype", void 0)
+], CvsController.prototype, "generateFromForm", null);
 __decorate([
     (0, common_1.Get)(':cvId'),
     __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),
@@ -93,8 +112,18 @@ __decorate([
     __metadata("design:paramtypes", [String, String, create_improved_cv_version_dto_1.CreateImprovedCvVersionDto]),
     __metadata("design:returntype", void 0)
 ], CvsController.prototype, "createImprovedVersion", null);
+__decorate([
+    (0, common_1.Post)(':cvId/versions/manual-edit'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),
+    __param(1, (0, common_1.Param)('cvId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, update_manual_cv_version_dto_1.UpdateManualCvVersionDto]),
+    __metadata("design:returntype", void 0)
+], CvsController.prototype, "createManualEditedVersion", null);
 exports.CvsController = CvsController = __decorate([
     (0, common_1.Controller)('cvs'),
-    __metadata("design:paramtypes", [cvs_service_1.CvsService])
+    __metadata("design:paramtypes", [cvs_service_1.CvsService,
+        cv_generation_workflow_service_1.CvGenerationWorkflowService])
 ], CvsController);
 //# sourceMappingURL=cvs.controller.js.map

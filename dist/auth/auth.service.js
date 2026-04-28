@@ -50,6 +50,7 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const typeorm_1 = require("@nestjs/typeorm");
 const bcrypt = __importStar(require("bcryptjs"));
+const crypto_1 = require("crypto");
 const typeorm_2 = require("typeorm");
 const database_enums_1 = require("../common/enums/database.enums");
 const user_setting_entity_1 = require("../users/entities/user-setting.entity");
@@ -69,7 +70,7 @@ let AuthService = class AuthService {
             where: { email: normalizedEmail },
         });
         if (existingUser) {
-            throw new common_1.ConflictException('Email already registered');
+            throw new common_1.ConflictException('El correo ya está registrado');
         }
         const passwordHash = await bcrypt.hash(registerDto.password, 10);
         const user = this.usersRepository.create({
@@ -78,6 +79,8 @@ let AuthService = class AuthService {
             passwordHash,
             status: database_enums_1.UserStatus.ACTIVE,
             lastLoginAt: null,
+            passwordResetTokenHash: null,
+            passwordResetExpiresAt: null,
         });
         const savedUser = await this.usersRepository.save(user);
         const existingSettings = await this.userSettingsRepository.findOne({
@@ -100,22 +103,70 @@ let AuthService = class AuthService {
             where: { email: normalizedEmail },
         });
         if (!user || user.status !== database_enums_1.UserStatus.ACTIVE) {
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException('Credenciales inválidas');
         }
         const isValidPassword = await bcrypt.compare(loginDto.password, user.passwordHash);
         if (!isValidPassword) {
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException('Credenciales inválidas');
         }
         user.lastLoginAt = new Date();
         const updatedUser = await this.usersRepository.save(user);
         return this.buildAuthResponse(updatedUser);
+    }
+    async forgotPassword(forgotPasswordDto) {
+        const normalizedEmail = forgotPasswordDto.email.trim().toLowerCase();
+        const user = await this.usersRepository.findOne({
+            where: { email: normalizedEmail, status: database_enums_1.UserStatus.ACTIVE },
+        });
+        if (!user) {
+            return {
+                message: 'Si el correo está registrado, se generó un token de recuperación',
+            };
+        }
+        const rawResetToken = (0, crypto_1.randomBytes)(32).toString('hex');
+        const passwordResetTokenHash = await bcrypt.hash(rawResetToken, 10);
+        user.passwordResetTokenHash = passwordResetTokenHash;
+        user.passwordResetExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
+        await this.usersRepository.save(user);
+        return {
+            message: 'Si el correo está registrado, se generó un token de recuperación',
+            resetToken: rawResetToken,
+            expiresAt: user.passwordResetExpiresAt,
+        };
+    }
+    async resetPassword(resetPasswordDto) {
+        const candidateUsers = await this.usersRepository.find({
+            where: {
+                status: database_enums_1.UserStatus.ACTIVE,
+                passwordResetTokenHash: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()),
+                passwordResetExpiresAt: (0, typeorm_2.MoreThan)(new Date()),
+            },
+        });
+        let matchedUser = null;
+        for (const candidateUser of candidateUsers) {
+            const isValidToken = await bcrypt.compare(resetPasswordDto.token, candidateUser.passwordResetTokenHash);
+            if (isValidToken) {
+                matchedUser = candidateUser;
+                break;
+            }
+        }
+        if (!matchedUser) {
+            throw new common_1.BadRequestException('El token de recuperación es inválido o expiró');
+        }
+        matchedUser.passwordHash = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+        matchedUser.passwordResetTokenHash = null;
+        matchedUser.passwordResetExpiresAt = null;
+        await this.usersRepository.save(matchedUser);
+        return {
+            message: 'Contraseña actualizada correctamente',
+        };
     }
     async getCurrentUser(userId) {
         const user = await this.usersRepository.findOne({
             where: { id: userId },
         });
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException('Usuario no encontrado');
         }
         return {
             id: user.id,

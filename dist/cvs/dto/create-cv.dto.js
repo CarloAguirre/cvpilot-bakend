@@ -129,6 +129,7 @@ class CreateCvDto {
     title;
     targetRole;
     sourceType;
+    stylePreset;
     jobDescription;
     personalDetails;
     workExperiences;
@@ -150,9 +151,14 @@ __decorate([
 ], CreateCvDto.prototype, "targetRole", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(database_enums_1.CvSourceType),
     __metadata("design:type", String)
 ], CreateCvDto.prototype, "sourceType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(database_enums_1.CvStylePreset),
+    __metadata("design:type", String)
+], CreateCvDto.prototype, "stylePreset", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

@@ -21,6 +21,11 @@ export declare enum GeneratedFileFormat {
     PDF = "pdf",
     DOCX = "docx"
 }
+export declare enum CvStylePreset {
+    ATS = "ats",
+    HARVARD = "harvard",
+    MODERNO = "moderno"
+}
 export declare enum CvImprovementRequestStatus {
     PENDING = "pending",
     PROCESSING = "processing",

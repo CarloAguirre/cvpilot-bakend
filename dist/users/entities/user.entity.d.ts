@@ -12,6 +12,8 @@ export declare class User extends SoftDeleteEntity {
     fullName: string;
     email: string;
     passwordHash: string;
+    passwordResetTokenHash: string | null;
+    passwordResetExpiresAt: Date | null;
     status: UserStatus;
     lastLoginAt: Date | null;
     setting: UserSetting;

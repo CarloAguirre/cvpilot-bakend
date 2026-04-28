@@ -1,4 +1,4 @@
-import { CvSourceType } from '../../common/enums/database.enums';
+import { CvSourceType, CvStylePreset } from '../../common/enums/database.enums';
 export declare class CreateCvPersonalDetailsDto {
     fullName: string;
     email: string;
@@ -26,6 +26,7 @@ export declare class CreateCvDto {
     title?: string;
     targetRole: string;
     sourceType?: CvSourceType;
+    stylePreset?: CvStylePreset;
     jobDescription?: string;
     personalDetails: CreateCvPersonalDetailsDto;
     workExperiences?: CreateCvWorkExperienceDto[];
