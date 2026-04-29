@@ -27,7 +27,12 @@ export class CvDocumentTextExtractorService {
       return this.normalizeExtractedText(extractedDocument.value);
     }
 
-    throw new BadRequestException('Only PDF or DOCX files can be processed');
+    if (normalizedExtension === 'txt') {
+      const textContent = await readFile(absolutePath, 'utf8');
+      return this.normalizeExtractedText(textContent);
+    }
+
+    throw new BadRequestException('Only PDF, DOCX, or TXT files can be processed');
   }
 
   private normalizeExtractedText(rawText: string | null | undefined) {

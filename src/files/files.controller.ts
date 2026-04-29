@@ -17,7 +17,7 @@ import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interfa
 import { CreateUploadedFileDto } from './dto/create-uploaded-file.dto';
 import { FilesService } from './files.service';
 
-const ALLOWED_EXTENSIONS = new Set(['.pdf', '.docx']);
+const ALLOWED_EXTENSIONS = new Set(['.pdf', '.docx', '.txt']);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 const resolveUploadDir = (userId: string) => {
@@ -82,7 +82,7 @@ export class FilesController {
 
         if (!ALLOWED_EXTENSIONS.has(extension)) {
           callback(
-            new BadRequestException('Only PDF or DOCX documents are allowed'),
+            new BadRequestException('Only PDF, DOCX, or TXT documents are allowed'),
             false,
           );
           return;

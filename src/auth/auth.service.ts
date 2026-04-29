@@ -35,7 +35,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('El correo ya está registrado');
+      throw new ConflictException('El correo ya est? registrado');
     }
 
     const passwordHash = await bcrypt.hash(registerDto.password, 10);
@@ -76,7 +76,7 @@ export class AuthService {
     });
 
     if (!user || user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Credenciales inv?lidas');
     }
 
     const isValidPassword = await bcrypt.compare(
@@ -85,7 +85,7 @@ export class AuthService {
     );
 
     if (!isValidPassword) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Credenciales inv?lidas');
     }
 
     user.lastLoginAt = new Date();
@@ -103,7 +103,7 @@ export class AuthService {
     if (!user) {
       return {
         message:
-          'Si el correo está registrado, se generó un token de recuperación',
+          'Si el correo est? registrado, se gener? un token de recuperaci?n',
       };
     }
 
@@ -117,7 +117,7 @@ export class AuthService {
 
     return {
       message:
-        'Si el correo está registrado, se generó un token de recuperación',
+        'Si el correo est? registrado, se gener? un token de recuperaci?n',
       resetToken: rawResetToken,
       expiresAt: user.passwordResetExpiresAt,
     };
@@ -148,7 +148,7 @@ export class AuthService {
 
     if (!matchedUser) {
       throw new BadRequestException(
-        'El token de recuperación es inválido o expiró',
+        'El token de recuperaci?n es inv?lido o expir?',
       );
     }
 
@@ -162,7 +162,21 @@ export class AuthService {
     await this.usersRepository.save(matchedUser);
 
     return {
-      message: 'Contraseña actualizada correctamente',
+      message: 'Contrase?a actualizada correctamente',
+    };
+  }
+
+  async logout(userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId, status: UserStatus.ACTIVE },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return {
+      message: 'Sesi?n cerrada correctamente',
     };
   }
 

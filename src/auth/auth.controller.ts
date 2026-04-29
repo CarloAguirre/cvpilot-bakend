@@ -35,6 +35,11 @@ export class AuthController {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
+  @Post('logout')
+  logout(@CurrentUser('sub') userId: string) {
+    return this.authService.logout(userId);
+  }
+
   @Get('me')
   me(@CurrentUser('sub') userId: string) {
     return this.authService.getCurrentUser(userId);
