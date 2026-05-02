@@ -16,7 +16,6 @@ exports.ReportsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-const database_enums_1 = require("../common/enums/database.enums");
 const report_snapshot_entity_1 = require("./entities/report-snapshot.entity");
 let ReportsService = class ReportsService {
     dataSource;
@@ -26,77 +25,39 @@ let ReportsService = class ReportsService {
         this.reportSnapshotsRepository = reportSnapshotsRepository;
     }
     async getDashboardSummary(userId) {
-        const [totals] = await this.dataSource.query(`
-        SELECT
-          COUNT(DISTINCT c.id)::int AS "totalCvs",
-          COUNT(v.id)::int AS "totalVersions",
-          COUNT(*) FILTER (WHERE v.version_type = $2)::int AS "totalCreatedVersions",
-          COUNT(*) FILTER (WHERE v.version_type = $3)::int AS "totalImprovedVersions",
-          MAX(GREATEST(COALESCE(c.updated_at, c.created_at), COALESCE(v.updated_at, v.created_at))) AS "lastActivityAt"
-        FROM cvs c
-        LEFT JOIN cv_versions v ON v.cv_id = c.id
-        WHERE c.user_id = $1
-          AND c.deleted_at IS NULL
-      `, [userId, database_enums_1.CvVersionType.CREATED, database_enums_1.CvVersionType.IMPROVED]);
+        const payload = await this.getCvActivityReportPayload(userId);
         return {
-            totalCvs: Number(totals?.totalCvs ?? 0),
-            totalVersions: Number(totals?.totalVersions ?? 0),
-            totalCreatedVersions: Number(totals?.totalCreatedVersions ?? 0),
-            totalImprovedVersions: Number(totals?.totalImprovedVersions ?? 0),
-            lastActivityAt: totals?.lastActivityAt ?? null,
+            totalCvs: this.toNumber(payload.totalCvs),
+            totalVersions: this.toNumber(payload.totalVersions),
+            totalCreatedVersions: this.toNumber(payload.createdVersions),
+            totalImprovedVersions: this.toNumber(payload.improvedVersions),
+            lastActivityAt: payload.lastActivityAt ?? null,
         };
     }
     async getReportsByRole(userId) {
-        const rows = await this.dataSource.query(`
-        SELECT
-          v.target_role AS "targetRole",
-          COUNT(*)::int AS "totalVersions"
-        FROM cv_versions v
-        INNER JOIN cvs c ON c.id = v.cv_id
-        WHERE c.user_id = $1
-          AND c.deleted_at IS NULL
-        GROUP BY v.target_role
-        ORDER BY "totalVersions" DESC, "targetRole" ASC
-      `, [userId]);
-        return rows.map((row) => ({
+        const payload = await this.getCvActivityReportPayload(userId);
+        return (payload.topTargetRoles ?? [])
+            .filter((row) => row.targetRole)
+            .map((row) => ({
             targetRole: row.targetRole,
-            totalVersions: Number(row.totalVersions),
+            totalVersions: this.toNumber(row.totalVersions),
         }));
     }
     async getReportsByVersionType(userId) {
-        const rows = await this.dataSource.query(`
-        SELECT
-          v.version_type AS "versionType",
-          COUNT(*)::int AS "totalVersions"
-        FROM cv_versions v
-        INNER JOIN cvs c ON c.id = v.cv_id
-        WHERE c.user_id = $1
-          AND c.deleted_at IS NULL
-        GROUP BY v.version_type
-        ORDER BY "totalVersions" DESC, "versionType" ASC
-      `, [userId]);
-        return rows.map((row) => ({
+        const payload = await this.getCvActivityReportPayload(userId);
+        return (payload.versionsByType ?? [])
+            .filter((row) => row.versionType)
+            .map((row) => ({
             versionType: row.versionType,
-            totalVersions: Number(row.totalVersions),
+            totalVersions: this.toNumber(row.totalVersions),
         }));
     }
     async getMonthlyReports(userId) {
-        const rows = await this.dataSource.query(`
-        SELECT
-          EXTRACT(YEAR FROM v.created_at)::int AS "reportYear",
-          EXTRACT(MONTH FROM v.created_at)::int AS "reportMonth",
-          COUNT(*)::int AS "totalVersions"
-        FROM cv_versions v
-        INNER JOIN cvs c ON c.id = v.cv_id
-        WHERE c.user_id = $1
-          AND c.deleted_at IS NULL
-        GROUP BY EXTRACT(YEAR FROM v.created_at), EXTRACT(MONTH FROM v.created_at)
-        ORDER BY "reportYear" ASC, "reportMonth" ASC
-      `, [userId]);
-        return rows.map((row) => ({
-            reportYear: Number(row.reportYear),
-            reportMonth: Number(row.reportMonth),
-            totalVersions: Number(row.totalVersions),
+        const payload = await this.getCvActivityReportPayload(userId);
+        return (payload.monthlyVersions ?? []).map((row) => ({
+            reportYear: this.toNumber(row.reportYear),
+            reportMonth: this.toNumber(row.reportMonth),
+            totalVersions: this.toNumber(row.totalVersions),
         }));
     }
     async listSnapshots(userId) {
@@ -112,11 +73,43 @@ let ReportsService = class ReportsService {
             userId,
             reportType: createReportSnapshotDto.reportType.trim(),
             reportPeriod: createReportSnapshotDto.reportPeriod?.trim() ?? null,
-            payload,
+            payload: payload,
             generatedAt: new Date(),
         });
         const savedSnapshot = await this.reportSnapshotsRepository.save(snapshot);
         return this.toSnapshotResponse(savedSnapshot);
+    }
+    async createDatabaseSnapshot(userId) {
+        const snapshot = await this.generateCvActivitySnapshot(userId);
+        return this.toSnapshotResponse(snapshot);
+    }
+    async getCvActivityReportPayload(userId) {
+        const snapshot = await this.generateCvActivitySnapshot(userId);
+        return this.toCvActivityReportPayload(snapshot.payload);
+    }
+    async generateCvActivitySnapshot(userId) {
+        await this.dataSource.query('CALL sp_generate_user_cv_report_snapshot($1::bigint)', [userId]);
+        const snapshot = await this.reportSnapshotsRepository.findOne({
+            where: {
+                userId,
+                reportType: 'cv_activity_summary',
+            },
+            order: { generatedAt: 'DESC' },
+        });
+        if (!snapshot) {
+            throw new common_1.InternalServerErrorException('Database report snapshot was not generated');
+        }
+        return snapshot;
+    }
+    toCvActivityReportPayload(payload) {
+        if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+            return {};
+        }
+        return payload;
+    }
+    toNumber(value) {
+        const numericValue = Number(value ?? 0);
+        return Number.isFinite(numericValue) ? numericValue : 0;
     }
     async buildPayload(userId, reportType) {
         switch (reportType.trim()) {

@@ -21,7 +21,7 @@ const node_path_1 = require("node:path");
 const current_user_decorator_1 = require("../auth/decorators/current-user.decorator");
 const create_uploaded_file_dto_1 = require("./dto/create-uploaded-file.dto");
 const files_service_1 = require("./files.service");
-const ALLOWED_EXTENSIONS = new Set(['.pdf', '.docx']);
+const ALLOWED_EXTENSIONS = new Set(['.pdf', '.docx', '.txt']);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const resolveUploadDir = (userId) => {
     const uploadRoot = process.env.UPLOAD_DIR ?? 'uploads';
@@ -90,7 +90,7 @@ __decorate([
         fileFilter: (_request, file, callback) => {
             const extension = (0, node_path_1.extname)(file.originalname).toLowerCase();
             if (!ALLOWED_EXTENSIONS.has(extension)) {
-                callback(new common_1.BadRequestException('Only PDF or DOCX documents are allowed'), false);
+                callback(new common_1.BadRequestException('Only PDF, DOCX, or TXT documents are allowed'), false);
                 return;
             }
             callback(null, true);

@@ -70,7 +70,7 @@ let AuthService = class AuthService {
             where: { email: normalizedEmail },
         });
         if (existingUser) {
-            throw new common_1.ConflictException('El correo ya está registrado');
+            throw new common_1.ConflictException('El correo ya est? registrado');
         }
         const passwordHash = await bcrypt.hash(registerDto.password, 10);
         const user = this.usersRepository.create({
@@ -103,11 +103,11 @@ let AuthService = class AuthService {
             where: { email: normalizedEmail },
         });
         if (!user || user.status !== database_enums_1.UserStatus.ACTIVE) {
-            throw new common_1.UnauthorizedException('Credenciales inválidas');
+            throw new common_1.UnauthorizedException('Credenciales inv?lidas');
         }
         const isValidPassword = await bcrypt.compare(loginDto.password, user.passwordHash);
         if (!isValidPassword) {
-            throw new common_1.UnauthorizedException('Credenciales inválidas');
+            throw new common_1.UnauthorizedException('Credenciales inv?lidas');
         }
         user.lastLoginAt = new Date();
         const updatedUser = await this.usersRepository.save(user);
@@ -120,7 +120,7 @@ let AuthService = class AuthService {
         });
         if (!user) {
             return {
-                message: 'Si el correo está registrado, se generó un token de recuperación',
+                message: 'Si el correo est? registrado, se gener? un token de recuperaci?n',
             };
         }
         const rawResetToken = (0, crypto_1.randomBytes)(32).toString('hex');
@@ -129,7 +129,7 @@ let AuthService = class AuthService {
         user.passwordResetExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
         await this.usersRepository.save(user);
         return {
-            message: 'Si el correo está registrado, se generó un token de recuperación',
+            message: 'Si el correo est? registrado, se gener? un token de recuperaci?n',
             resetToken: rawResetToken,
             expiresAt: user.passwordResetExpiresAt,
         };
@@ -151,14 +151,25 @@ let AuthService = class AuthService {
             }
         }
         if (!matchedUser) {
-            throw new common_1.BadRequestException('El token de recuperación es inválido o expiró');
+            throw new common_1.BadRequestException('El token de recuperaci?n es inv?lido o expir?');
         }
         matchedUser.passwordHash = await bcrypt.hash(resetPasswordDto.newPassword, 10);
         matchedUser.passwordResetTokenHash = null;
         matchedUser.passwordResetExpiresAt = null;
         await this.usersRepository.save(matchedUser);
         return {
-            message: 'Contraseña actualizada correctamente',
+            message: 'Contrase?a actualizada correctamente',
+        };
+    }
+    async logout(userId) {
+        const user = await this.usersRepository.findOne({
+            where: { id: userId, status: database_enums_1.UserStatus.ACTIVE },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException('Usuario no encontrado');
+        }
+        return {
+            message: 'Sesi?n cerrada correctamente',
         };
     }
     async getCurrentUser(userId) {

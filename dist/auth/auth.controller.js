@@ -38,6 +38,9 @@ let AuthController = class AuthController {
     resetPassword(resetPasswordDto) {
         return this.authService.resetPassword(resetPasswordDto);
     }
+    logout(userId) {
+        return this.authService.logout(userId);
+    }
     me(userId) {
         return this.authService.getCurrentUser(userId);
     }
@@ -75,6 +78,13 @@ __decorate([
     __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "resetPassword", null);
+__decorate([
+    (0, common_1.Post)('logout'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "logout", null);
 __decorate([
     (0, common_1.Get)('me'),
     __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),

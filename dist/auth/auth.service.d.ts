@@ -48,6 +48,9 @@ export declare class AuthService {
     resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{
         message: string;
     }>;
+    logout(userId: string): Promise<{
+        message: string;
+    }>;
     getCurrentUser(userId: string): Promise<{
         id: string;
         fullName: string;

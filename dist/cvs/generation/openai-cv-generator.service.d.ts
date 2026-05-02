@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { CreateCvEducationEntryDto, CreateCvWorkExperienceDto } from '../dto/create-cv.dto';
 import { GenerateCvFromFormDto } from '../dto/generate-cv-from-form.dto';
 import { CvPromptBuilderService } from './cv-prompt-builder.service';
 export interface GeneratedCvContent {
@@ -6,6 +7,8 @@ export interface GeneratedCvContent {
     summaryText: string;
     skills: string[];
     skillsText: string | null;
+    workExperiences: CreateCvWorkExperienceDto[];
+    educationEntries: CreateCvEducationEntryDto[];
 }
 export interface ExtractedDocumentCvContent {
     title: string | null;
@@ -61,11 +64,14 @@ export declare class OpenAiCvGeneratorService {
     private readRequiredConfig;
     private formatProviderName;
     private parseGeneratedContent;
+    private mergeGeneratedWorkExperiences;
+    private mergeGeneratedEducationEntries;
     private parseUploadedDocumentContent;
     private parseJsonPayload;
     private readObject;
     private readObjectArray;
     private readString;
+    private readBoolean;
     private readStringArray;
     private splitSkillsText;
     private normalizeSkills;

@@ -40,6 +40,9 @@ let ReportsController = class ReportsController {
     createSnapshot(userId, createReportSnapshotDto) {
         return this.reportsService.createSnapshot(userId, createReportSnapshotDto);
     }
+    createDatabaseSnapshot(userId) {
+        return this.reportsService.createDatabaseSnapshot(userId);
+    }
 };
 exports.ReportsController = ReportsController;
 __decorate([
@@ -85,6 +88,13 @@ __decorate([
     __metadata("design:paramtypes", [String, create_report_snapshot_dto_1.CreateReportSnapshotDto]),
     __metadata("design:returntype", void 0)
 ], ReportsController.prototype, "createSnapshot", null);
+__decorate([
+    (0, common_1.Post)('snapshots/database'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ReportsController.prototype, "createDatabaseSnapshot", null);
 exports.ReportsController = ReportsController = __decorate([
     (0, common_1.Controller)('reports'),
     __metadata("design:paramtypes", [reports_service_1.ReportsService])

@@ -22,8 +22,11 @@ __decorate([
 ], ResetPasswordDto.prototype, "token", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(6),
+    (0, class_validator_1.MinLength)(8),
     (0, class_validator_1.MaxLength)(72),
+    (0, class_validator_1.Matches)(/^(?=.*[A-Z])(?=.*\d).+$/, {
+        message: 'newPassword must contain at least one uppercase letter and one number',
+    }),
     __metadata("design:type", String)
 ], ResetPasswordDto.prototype, "newPassword", void 0);
 //# sourceMappingURL=reset-password.dto.js.map

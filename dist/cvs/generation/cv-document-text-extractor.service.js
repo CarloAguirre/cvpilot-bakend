@@ -30,7 +30,11 @@ let CvDocumentTextExtractorService = class CvDocumentTextExtractorService {
             const extractedDocument = await mammoth_1.default.extractRawText({ path: absolutePath });
             return this.normalizeExtractedText(extractedDocument.value);
         }
-        throw new common_1.BadRequestException('Only PDF or DOCX files can be processed');
+        if (normalizedExtension === 'txt') {
+            const textContent = await (0, promises_1.readFile)(absolutePath, 'utf8');
+            return this.normalizeExtractedText(textContent);
+        }
+        throw new common_1.BadRequestException('Only PDF, DOCX, or TXT files can be processed');
     }
     normalizeExtractedText(rawText) {
         const normalizedText = (rawText ?? '').replaceAll(/\r\n?/g, '\n').trim();

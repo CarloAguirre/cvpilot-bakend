@@ -228,6 +228,9 @@ export class CvsService {
       });
 
       const nextVersionNumber = (latestVersion?.versionNumber ?? 0) + 1;
+      const nextSummaryText =
+        createImprovedCvVersionDto.summaryText?.trim() ??
+        sourceVersion.summaryText;
 
       const newVersion = await cvVersionRepository.save(
         cvVersionRepository.create({
@@ -238,9 +241,7 @@ export class CvsService {
           jobDescription:
             createImprovedCvVersionDto.jobDescription?.trim() ??
             sourceVersion.jobDescription,
-          summaryText:
-            createImprovedCvVersionDto.summaryText?.trim() ??
-            sourceVersion.summaryText,
+          summaryText: nextSummaryText,
           skillsText:
             createImprovedCvVersionDto.skillsText?.trim() ??
             this.stringifySkillList(createImprovedCvVersionDto.skills) ??
@@ -278,40 +279,65 @@ export class CvsService {
             phone: sourceVersion.personalDetail.phone,
             location: sourceVersion.personalDetail.location,
             professionalSummary:
+              nextSummaryText ??
               sourceVersion.personalDetail.professionalSummary,
           }),
         );
       }
 
-      if (sourceVersion.workExperiences.length) {
-        await cvWorkExperiencesRepository.save(
-          sourceVersion.workExperiences.map((workExperience) =>
-            cvWorkExperiencesRepository.create({
-              cvVersionId: newVersion.id,
+      const nextWorkExperiences =
+        createImprovedCvVersionDto.workExperiences?.length
+          ? createImprovedCvVersionDto.workExperiences
+          : sourceVersion.workExperiences.map((workExperience) => ({
               companyName: workExperience.companyName,
               jobTitle: workExperience.jobTitle,
               periodLabel: workExperience.periodLabel,
-              startDate: workExperience.startDate,
-              endDate: workExperience.endDate,
+              startDate: workExperience.startDate ?? undefined,
+              endDate: workExperience.endDate ?? undefined,
               isCurrent: workExperience.isCurrent,
-              description: workExperience.description,
-              displayOrder: workExperience.displayOrder,
+              description: workExperience.description ?? undefined,
+            }));
+
+      if (nextWorkExperiences.length) {
+        await cvWorkExperiencesRepository.save(
+          nextWorkExperiences.map((workExperience, index) =>
+            cvWorkExperiencesRepository.create({
+              cvVersionId: newVersion.id,
+              companyName: workExperience.companyName.trim(),
+              jobTitle: workExperience.jobTitle.trim(),
+              periodLabel: workExperience.periodLabel.trim(),
+              startDate: workExperience.startDate?.trim() ?? null,
+              endDate: workExperience.endDate?.trim() ?? null,
+              isCurrent: workExperience.isCurrent ?? false,
+              description: workExperience.description?.trim() ?? null,
+              displayOrder: index + 1,
             }),
           ),
         );
       }
 
-      if (sourceVersion.educationEntries.length) {
-        await cvEducationEntriesRepository.save(
-          sourceVersion.educationEntries.map((educationEntry) =>
-            cvEducationEntriesRepository.create({
-              cvVersionId: newVersion.id,
+      const nextEducationEntries =
+        createImprovedCvVersionDto.educationEntries?.length
+          ? createImprovedCvVersionDto.educationEntries
+          : sourceVersion.educationEntries.map((educationEntry) => ({
               institutionName: educationEntry.institutionName,
               degreeTitle: educationEntry.degreeTitle,
               periodLabel: educationEntry.periodLabel,
-              startDate: educationEntry.startDate,
-              endDate: educationEntry.endDate,
-              displayOrder: educationEntry.displayOrder,
+              startDate: educationEntry.startDate ?? undefined,
+              endDate: educationEntry.endDate ?? undefined,
+            }));
+
+      if (nextEducationEntries.length) {
+        await cvEducationEntriesRepository.save(
+          nextEducationEntries.map((educationEntry, index) =>
+            cvEducationEntriesRepository.create({
+              cvVersionId: newVersion.id,
+              institutionName: educationEntry.institutionName.trim(),
+              degreeTitle: educationEntry.degreeTitle.trim(),
+              periodLabel: educationEntry.periodLabel.trim(),
+              startDate: educationEntry.startDate?.trim() ?? null,
+              endDate: educationEntry.endDate?.trim() ?? null,
+              displayOrder: index + 1,
             }),
           ),
         );

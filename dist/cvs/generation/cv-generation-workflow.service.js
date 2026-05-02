@@ -37,8 +37,8 @@ let CvGenerationWorkflowService = class CvGenerationWorkflowService {
             targetRole: generatedContent.targetRole,
             personalDetails: generateCvFromFormDto.personalDetails,
             summaryText: generatedContent.summaryText,
-            workExperiences: generateCvFromFormDto.workExperiences ?? [],
-            educationEntries: generateCvFromFormDto.educationEntries ?? [],
+            workExperiences: generatedContent.workExperiences,
+            educationEntries: generatedContent.educationEntries,
             skills: generatedContent.skills,
         });
         const storedPdf = await this.generatedDocumentsStorageService.storeCvPdf(userId, generatedPdfBuffer);
@@ -60,6 +60,8 @@ let CvGenerationWorkflowService = class CvGenerationWorkflowService {
             summaryText: generatedContent.summaryText,
             skills: generatedContent.skills,
             skillsText: generatedContent.skillsText ?? undefined,
+            workExperiences: generatedContent.workExperiences,
+            educationEntries: generatedContent.educationEntries,
             stylePreset: generateCvFromFormDto.stylePreset,
             generatedFileUrl: storedPdf.publicUrl,
             generatedFileFormat: database_enums_1.GeneratedFileFormat.PDF,

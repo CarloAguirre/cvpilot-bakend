@@ -12,6 +12,10 @@ import OpenAI, {
   APIError,
   RateLimitError,
 } from 'openai';
+import {
+  CreateCvEducationEntryDto,
+  CreateCvWorkExperienceDto,
+} from '../dto/create-cv.dto';
 import { GenerateCvFromFormDto } from '../dto/generate-cv-from-form.dto';
 import { CvPromptBuilderService } from './cv-prompt-builder.service';
 
@@ -20,6 +24,8 @@ export interface GeneratedCvContent {
   summaryText: string;
   skills: string[];
   skillsText: string | null;
+  workExperiences: CreateCvWorkExperienceDto[];
+  educationEntries: CreateCvEducationEntryDto[];
 }
 
 export interface ExtractedDocumentCvContent {
@@ -288,13 +294,92 @@ export class OpenAiCvGeneratorService {
     const skillsText =
       this.readString(parsedContent, 'skillsText') ||
       (skills.length ? skills.join(', ') : null);
+    const workExperiences = this.mergeGeneratedWorkExperiences(
+      parsedContent,
+      generateCvFromFormDto.workExperiences ?? [],
+    );
+    const educationEntries = this.mergeGeneratedEducationEntries(
+      parsedContent,
+      generateCvFromFormDto.educationEntries ?? [],
+    );
 
     return {
       targetRole,
       summaryText,
       skills,
       skillsText,
+      workExperiences,
+      educationEntries,
     };
+  }
+
+  private mergeGeneratedWorkExperiences(
+    payload: unknown,
+    sourceWorkExperiences: CreateCvWorkExperienceDto[],
+  ) {
+    const generatedEntries = this.readObjectArray(payload, 'workExperiences');
+
+    return sourceWorkExperiences.map((workExperience, index) => {
+      const generatedEntry = generatedEntries[index] ?? {};
+      const normalizedDescription =
+        this.readString(generatedEntry, 'description') ??
+        workExperience.description?.trim() ??
+        undefined;
+
+      return {
+        companyName:
+          this.readString(generatedEntry, 'companyName') ??
+          workExperience.companyName.trim(),
+        jobTitle:
+          this.readString(generatedEntry, 'jobTitle') ??
+          workExperience.jobTitle.trim(),
+        periodLabel:
+          this.readString(generatedEntry, 'periodLabel') ??
+          workExperience.periodLabel.trim(),
+        startDate:
+          this.readString(generatedEntry, 'startDate') ??
+          workExperience.startDate?.trim(),
+        endDate:
+          this.readString(generatedEntry, 'endDate') ??
+          workExperience.endDate?.trim(),
+        isCurrent:
+          this.readBoolean(generatedEntry, 'isCurrent') ??
+          workExperience.isCurrent ??
+          false,
+        ...(normalizedDescription
+          ? { description: normalizedDescription }
+          : {}),
+      };
+    });
+  }
+
+  private mergeGeneratedEducationEntries(
+    payload: unknown,
+    sourceEducationEntries: CreateCvEducationEntryDto[],
+  ) {
+    const generatedEntries = this.readObjectArray(payload, 'educationEntries');
+
+    return sourceEducationEntries.map((educationEntry, index) => {
+      const generatedEntry = generatedEntries[index] ?? {};
+
+      return {
+        institutionName:
+          this.readString(generatedEntry, 'institutionName') ??
+          educationEntry.institutionName.trim(),
+        degreeTitle:
+          this.readString(generatedEntry, 'degreeTitle') ??
+          educationEntry.degreeTitle.trim(),
+        periodLabel:
+          this.readString(generatedEntry, 'periodLabel') ??
+          educationEntry.periodLabel.trim(),
+        startDate:
+          this.readString(generatedEntry, 'startDate') ??
+          educationEntry.startDate?.trim(),
+        endDate:
+          this.readString(generatedEntry, 'endDate') ??
+          educationEntry.endDate?.trim(),
+      };
+    });
   }
 
   private parseUploadedDocumentContent(
@@ -440,6 +525,11 @@ export class OpenAiCvGeneratorService {
 
     const normalizedCandidate = candidate.trim();
     return normalizedCandidate.length ? normalizedCandidate : null;
+  }
+
+  private readBoolean(payload: unknown, key: string) {
+    const candidate = (payload as Record<string, unknown>)[key];
+    return typeof candidate === 'boolean' ? candidate : null;
   }
 
   private readStringArray(payload: unknown, key: string) {

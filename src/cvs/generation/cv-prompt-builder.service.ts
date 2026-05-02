@@ -16,11 +16,17 @@ export class CvPromptBuilderService {
       'Return only valid JSON without markdown or code fences.',
       'Keep the writing professional, concise, and aligned to the target role.',
       'Do not invent employers, dates, degrees, or certifications that are not present in the input.',
-      'Respond with a JSON object that contains exactly these keys: targetRole, summaryText, skills, skillsText.',
+      'Respond with a JSON object that contains exactly these keys: targetRole, summaryText, skills, skillsText, workExperiences, educationEntries.',
       'targetRole must be a string.',
       'summaryText must be a string with 2 to 4 sentences.',
       'skills must be an array of 6 to 12 short strings when enough information exists.',
       'skillsText must be a comma-separated string derived from skills.',
+      'workExperiences must be an array with the same length and order as the input workExperiences array.',
+      'Each workExperiences item must contain exactly: companyName, jobTitle, periodLabel, startDate, endDate, isCurrent, description.',
+      'Preserve companyName, jobTitle, periodLabel, startDate, endDate, and isCurrent from the input. You may only improve description when a factual description already exists. If it does not exist, return null.',
+      'educationEntries must be an array with the same length and order as the input educationEntries array.',
+      'Each educationEntries item must contain exactly: institutionName, degreeTitle, periodLabel, startDate, endDate.',
+      'Preserve institutionName, periodLabel, startDate, and endDate from the input. You may lightly normalize degreeTitle wording for clarity, but do not add new credentials.',
       'Preserve the input language unless the user explicitly asks for another one.',
     ].join('\n');
   }

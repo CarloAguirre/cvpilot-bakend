@@ -11,7 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateImprovedCvVersionDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const database_enums_1 = require("../../common/enums/database.enums");
+const create_cv_dto_1 = require("./create-cv.dto");
 class CreateImprovedCvVersionDto {
     targetRole;
     jobDescription;
@@ -24,6 +26,8 @@ class CreateImprovedCvVersionDto {
     resultSourceType;
     improvementRequestId;
     skills;
+    workExperiences;
+    educationEntries;
 }
 exports.CreateImprovedCvVersionDto = CreateImprovedCvVersionDto;
 __decorate([
@@ -82,4 +86,20 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateImprovedCvVersionDto.prototype, "skills", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayMaxSize)(30),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => create_cv_dto_1.CreateCvWorkExperienceDto),
+    __metadata("design:type", Array)
+], CreateImprovedCvVersionDto.prototype, "workExperiences", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayMaxSize)(20),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => create_cv_dto_1.CreateCvEducationEntryDto),
+    __metadata("design:type", Array)
+], CreateImprovedCvVersionDto.prototype, "educationEntries", void 0);
 //# sourceMappingURL=create-improved-cv-version.dto.js.map

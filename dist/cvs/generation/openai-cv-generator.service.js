@@ -202,12 +202,61 @@ let OpenAiCvGeneratorService = OpenAiCvGeneratorService_1 = class OpenAiCvGenera
         const skills = generatedSkills.length ? generatedSkills : fallbackSkills;
         const skillsText = this.readString(parsedContent, 'skillsText') ||
             (skills.length ? skills.join(', ') : null);
+        const workExperiences = this.mergeGeneratedWorkExperiences(parsedContent, generateCvFromFormDto.workExperiences ?? []);
+        const educationEntries = this.mergeGeneratedEducationEntries(parsedContent, generateCvFromFormDto.educationEntries ?? []);
         return {
             targetRole,
             summaryText,
             skills,
             skillsText,
+            workExperiences,
+            educationEntries,
         };
+    }
+    mergeGeneratedWorkExperiences(payload, sourceWorkExperiences) {
+        const generatedEntries = this.readObjectArray(payload, 'workExperiences');
+        return sourceWorkExperiences.map((workExperience, index) => {
+            const generatedEntry = generatedEntries[index] ?? {};
+            const normalizedDescription = this.readString(generatedEntry, 'description') ??
+                workExperience.description?.trim() ??
+                undefined;
+            return {
+                companyName: this.readString(generatedEntry, 'companyName') ??
+                    workExperience.companyName.trim(),
+                jobTitle: this.readString(generatedEntry, 'jobTitle') ??
+                    workExperience.jobTitle.trim(),
+                periodLabel: this.readString(generatedEntry, 'periodLabel') ??
+                    workExperience.periodLabel.trim(),
+                startDate: this.readString(generatedEntry, 'startDate') ??
+                    workExperience.startDate?.trim(),
+                endDate: this.readString(generatedEntry, 'endDate') ??
+                    workExperience.endDate?.trim(),
+                isCurrent: this.readBoolean(generatedEntry, 'isCurrent') ??
+                    workExperience.isCurrent ??
+                    false,
+                ...(normalizedDescription
+                    ? { description: normalizedDescription }
+                    : {}),
+            };
+        });
+    }
+    mergeGeneratedEducationEntries(payload, sourceEducationEntries) {
+        const generatedEntries = this.readObjectArray(payload, 'educationEntries');
+        return sourceEducationEntries.map((educationEntry, index) => {
+            const generatedEntry = generatedEntries[index] ?? {};
+            return {
+                institutionName: this.readString(generatedEntry, 'institutionName') ??
+                    educationEntry.institutionName.trim(),
+                degreeTitle: this.readString(generatedEntry, 'degreeTitle') ??
+                    educationEntry.degreeTitle.trim(),
+                periodLabel: this.readString(generatedEntry, 'periodLabel') ??
+                    educationEntry.periodLabel.trim(),
+                startDate: this.readString(generatedEntry, 'startDate') ??
+                    educationEntry.startDate?.trim(),
+                endDate: this.readString(generatedEntry, 'endDate') ??
+                    educationEntry.endDate?.trim(),
+            };
+        });
     }
     parseUploadedDocumentContent(rawContent, input) {
         const parsedContent = this.parseJsonPayload(rawContent);
@@ -303,6 +352,10 @@ let OpenAiCvGeneratorService = OpenAiCvGeneratorService_1 = class OpenAiCvGenera
         }
         const normalizedCandidate = candidate.trim();
         return normalizedCandidate.length ? normalizedCandidate : null;
+    }
+    readBoolean(payload, key) {
+        const candidate = payload[key];
+        return typeof candidate === 'boolean' ? candidate : null;
     }
     readStringArray(payload, key) {
         const candidate = payload[key];

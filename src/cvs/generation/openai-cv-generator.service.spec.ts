@@ -11,6 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { CvPromptBuilderService } from './cv-prompt-builder.service';
 import { OpenAiCvGeneratorService } from './openai-cv-generator.service';
+import { GenerateCvFromFormDto } from '../dto/generate-cv-from-form.dto';
 
 const openAiProviderConfig = {
   providerName: 'OpenAI',
@@ -159,5 +160,92 @@ describe('OpenAiCvGeneratorService', () => {
       baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
       model: 'gemini-2.5-flash-lite',
     });
+  });
+
+  it('merges improved work experience and education fields with form data', () => {
+    const generateCvFromFormDto: GenerateCvFromFormDto = {
+      targetRole: 'Backend Developer',
+      personalDetails: {
+        fullName: 'Ada Lovelace',
+        email: 'ada@example.com',
+        professionalSummary: 'Backend developer with API experience.',
+      },
+      workExperiences: [
+        {
+          companyName: 'Acme Corp',
+          jobTitle: 'Software Engineer',
+          periodLabel: '2021 - 2024',
+          startDate: '2021-01-01',
+          endDate: '2024-01-01',
+          isCurrent: false,
+          description: 'Built internal APIs and automation scripts.',
+        },
+      ],
+      educationEntries: [
+        {
+          institutionName: 'Universidad Central',
+          degreeTitle: 'Ing. de Sistemas',
+          periodLabel: '2016 - 2020',
+          startDate: '2016-01-01',
+          endDate: '2020-01-01',
+        },
+      ],
+      skills: ['Node.js'],
+      skillsText: 'Node.js',
+    };
+
+    const rawContent = JSON.stringify({
+      targetRole: 'Senior Backend Engineer',
+      summaryText: 'Experienced backend engineer focused on scalable APIs.',
+      skills: ['TypeScript', 'NestJS'],
+      skillsText: 'TypeScript, NestJS',
+      workExperiences: [
+        {
+          description:
+            'Designed and maintained REST APIs with a focus on reliability and maintainability.',
+        },
+      ],
+      educationEntries: [
+        {
+          degreeTitle: 'Ingenieria de Sistemas',
+        },
+      ],
+    });
+
+    const result = (
+      service as unknown as {
+        parseGeneratedContent(
+          rawContent: string,
+          generateCvFromFormDto: GenerateCvFromFormDto,
+        ): ReturnType<OpenAiCvGeneratorService['generateFromForm']> extends Promise<
+          infer T
+        >
+          ? T
+          : never;
+      }
+    ).parseGeneratedContent(rawContent, generateCvFromFormDto);
+
+    expect(result.workExperiences).toEqual([
+      {
+        companyName: 'Acme Corp',
+        jobTitle: 'Software Engineer',
+        periodLabel: '2021 - 2024',
+        startDate: '2021-01-01',
+        endDate: '2024-01-01',
+        isCurrent: false,
+        description:
+          'Designed and maintained REST APIs with a focus on reliability and maintainability.',
+      },
+    ]);
+
+    expect(result.educationEntries).toEqual([
+      {
+        institutionName: 'Universidad Central',
+        degreeTitle: 'Ingenieria de Sistemas',
+        periodLabel: '2016 - 2020',
+        startDate: '2016-01-01',
+        endDate: '2020-01-01',
+      },
+    ]);
   });
 });

@@ -39,4 +39,9 @@ export class ReportsController {
   ) {
     return this.reportsService.createSnapshot(userId, createReportSnapshotDto);
   }
+
+  @Post('snapshots/database')
+  createDatabaseSnapshot(@CurrentUser('sub') userId: string) {
+    return this.reportsService.createDatabaseSnapshot(userId);
+  }
 }

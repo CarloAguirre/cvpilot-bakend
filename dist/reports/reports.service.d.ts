@@ -10,11 +10,21 @@ export declare class ReportsService {
         totalVersions: number;
         totalCreatedVersions: number;
         totalImprovedVersions: number;
-        lastActivityAt: any;
+        lastActivityAt: string | Date | null;
     }>;
-    getReportsByRole(userId: string): Promise<any>;
-    getReportsByVersionType(userId: string): Promise<any>;
-    getMonthlyReports(userId: string): Promise<any>;
+    getReportsByRole(userId: string): Promise<{
+        targetRole: string;
+        totalVersions: number;
+    }[]>;
+    getReportsByVersionType(userId: string): Promise<{
+        versionType: string | null | undefined;
+        totalVersions: number;
+    }[]>;
+    getMonthlyReports(userId: string): Promise<{
+        reportYear: number;
+        reportMonth: number;
+        totalVersions: number;
+    }[]>;
     listSnapshots(userId: string): Promise<{
         id: string;
         userId: string;
@@ -31,6 +41,18 @@ export declare class ReportsService {
         payload: Record<string, unknown>;
         generatedAt: Date;
     }>;
+    createDatabaseSnapshot(userId: string): Promise<{
+        id: string;
+        userId: string;
+        reportType: string;
+        reportPeriod: string | null;
+        payload: Record<string, unknown>;
+        generatedAt: Date;
+    }>;
+    private getCvActivityReportPayload;
+    private generateCvActivitySnapshot;
+    private toCvActivityReportPayload;
+    private toNumber;
     private buildPayload;
     private toSnapshotResponse;
 }

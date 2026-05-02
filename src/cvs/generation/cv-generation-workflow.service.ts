@@ -38,8 +38,8 @@ export class CvGenerationWorkflowService {
       targetRole: generatedContent.targetRole,
       personalDetails: generateCvFromFormDto.personalDetails,
       summaryText: generatedContent.summaryText,
-      workExperiences: generateCvFromFormDto.workExperiences ?? [],
-      educationEntries: generateCvFromFormDto.educationEntries ?? [],
+      workExperiences: generatedContent.workExperiences,
+      educationEntries: generatedContent.educationEntries,
       skills: generatedContent.skills,
     });
 
@@ -67,6 +67,8 @@ export class CvGenerationWorkflowService {
       summaryText: generatedContent.summaryText,
       skills: generatedContent.skills,
       skillsText: generatedContent.skillsText ?? undefined,
+      workExperiences: generatedContent.workExperiences,
+      educationEntries: generatedContent.educationEntries,
       stylePreset: generateCvFromFormDto.stylePreset,
       generatedFileUrl: storedPdf.publicUrl,
       generatedFileFormat: GeneratedFileFormat.PDF,

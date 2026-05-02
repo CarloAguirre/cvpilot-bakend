@@ -28,8 +28,11 @@ __decorate([
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(6),
+    (0, class_validator_1.MinLength)(8),
     (0, class_validator_1.MaxLength)(72),
+    (0, class_validator_1.Matches)(/^(?=.*[A-Z])(?=.*\d).+$/, {
+        message: 'password must contain at least one uppercase letter and one number',
+    }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
 //# sourceMappingURL=register.dto.js.map
